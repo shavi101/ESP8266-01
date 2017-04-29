@@ -1,0 +1,104 @@
+#include <Adafruit_ESP8266.h>
+#include <SoftwareSerial.h>
+
+String request="GET";
+
+#define ESP_RX   9//RX
+#define ESP_TX   10//TX
+#define ESP_RST  8
+SoftwareSerial softser(ESP_RX, ESP_TX);
+Stream *esp = &softser;
+
+// can be a SoftwareSerial stream, or Serial/Serial1/etc. for UART.
+
+Adafruit_ESP8266 wifi(&softser, &Serial, ESP_RST);
+//Creating an Adafruit_ESP8266 object with 3 parameters passed. 
+// Must declare output stream before Adafruit_ESP8266 constructor; 
+
+#define ESP_SSID "SSID" // Your network name here
+#define ESP_PASS "PASS" // Your network password here
+
+#define HOST     "api.pushingbox.com"  //Host to contact    
+#define PORT     80                   //80 = HTTP default port
+
+//................................................................
+void setup() {
+    char buffer[50];
+    delay(2000);
+    Serial.begin(57600);
+    request += " /pushingbox?devid=vCB2DD101A50CEFD&status=Yay!It worked!&submit=Submit";
+  
+    // comment/replace this if you are using something other than v 0.9.2.4!
+    wifi.setBootMarker(F("Version:0.9.2.4]\r\n\r\nready"));
+  
+    softser.begin(9600); // Soft serial connection to ESP8266
+  
+    Serial.println(F("Adafruit ESP8266"));//You can pass flash-memory(non-volatile arduino memory) based strings to Serial.print() by 
+    wrapping them with F().
+  
+    // Test if module is ready
+    Serial.print(F("Hard reset..."));
+    if (!wifi.hardReset()) {
+      Serial.println(F("no response from module."));
+      for (;;);
+    }
+    Serial.println(F("OK."));
+  
+    Serial.print(F("Soft reset..."));
+    if (!wifi.softReset()) {
+      Serial.println(F("no response from module."));
+      for (;;);
+    }
+    Serial.println(F("OK."));
+  
+    Serial.print(F("Checking firmware version..."));
+    wifi.println(F("AT+GMR"));
+    if (wifi.readLine(buffer, sizeof(buffer))) {
+      Serial.println(buffer);
+      wifi.find(); // Discard the 'OK' that follows
+    } else {
+      Serial.println(F("error"));
+    }
+  
+    Serial.print(F("Connecting to WiFi..."));
+    if (wifi.connectToAP(F(ESP_SSID), F(ESP_PASS))) {
+  
+      // IP addr check isn't part of library yet, but we can manually request and place in a string.
+      Serial.print(F("OK\nChecking IP addr..."));
+      wifi.println(F("AT+CIFSR"));
+      if (wifi.readLine(buffer, sizeof(buffer))) {
+        Serial.println(buffer);
+        wifi.find(); // Discard the 'OK' that follows
+  
+        Serial.print(F("Connecting to host..."));
+  
+        Serial.print("Connected..");
+        wifi.println("AT+CIPMUX=0"); // configure for single connection,
+        //we should only be connected to one SMTP server
+        wifi.find();
+        wifi.closeTCP(); // close any open TCP connections
+        wifi.find();
+        Serial.println("Type \"send it\" to send an email");
+  
+      } else { // IP addr check failed
+        Serial.println(F("error"));
+      }
+    } else { // WiFi connection failed
+      Serial.println(F("FAIL"));
+    }
+    
+    //The above code was used to get connected to Wi-Fi. At this point you must be already connected.
+    
+    Serial.println("Connecting...");
+    uint32_t ip = getIP();
+    Serial.print("ESP setup success, my IP addr:");
+    if (ip) {
+      Serial.println(ip, HEX);
+    } else {
+      Serial.println("none");
+    }
+  
+    sendCheckReply("AT+CIPSTO=0", "OK");
+    delay(1000);
+  
+  }
