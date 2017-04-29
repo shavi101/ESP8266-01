@@ -7,7 +7,8 @@ String request="GET";
 #define ESP_TX   10//TX
 #define ESP_RST  8
 SoftwareSerial softser(ESP_RX, ESP_TX);
-Stream *esp = &softser;
+Stream *esp = &softser; //Stream is the base class for character and binary based streams. It is not called directly, but invoked whenever you use a function that relies on it
+// * after the class name would be the c++ notation for a pointer
 
 // can be a SoftwareSerial stream, or Serial/Serial1/etc. for UART.
 
@@ -21,7 +22,16 @@ Adafruit_ESP8266 wifi(&softser, &Serial, ESP_RST);
 #define HOST     "api.pushingbox.com"  //Host to contact    
 #define PORT     80                   //80 = HTTP default port
 
-//................................................................
+
+#define REPLYBUFFSIZ 255
+char replybuffer[REPLYBUFFSIZ]; 
+//......................Forward declarations/Methods will be implemented towards the end of the code.........
+uint8_t getReply(char const *send, uint16_t timeout = 500, boolean echo = true);
+uint8_t espreadline(uint16_t timeout = 500, boolean multiline = false);//is an integer type that can store 16 bits (2 bytes atleast)
+boolean sendCheckReply(char const *send, char const *reply, uint16_t timeout = 500);
+//-----------------------------------------------------------------
+enum {WIFI_ERROR_NONE = 0, WIFI_ERROR_AT, WIFI_ERROR_RST, WIFI_ERROR_SSIDPWD, WIFI_ERROR_SERVER, WIFI_ERROR_UNKNOWN};
+
 void setup() {
     char buffer[50];
     delay(2000);
