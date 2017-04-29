@@ -149,7 +149,7 @@ boolean ESP_GETpage(char const *host, uint16_t port) {//,char const *page
     }
   }
 
-  request += " /pushingbox?devid=vCB2DD101A50CEFD&status=Yay!It worked!&submit=Submit";
+  request += " /pushingbox?devid=vCB2DD101A50CEFD&status=Yay!It worked!&submit=Submit"; //This is where you have to use the device id given by PushingBox
   request += " HTTP/1.1\r\nHost: ";
   request += host;
   request += "\r\n\r\n";
