@@ -7,9 +7,7 @@ String request="GET";
 #define ESP_TX   10//TX
 #define ESP_RST  8
 SoftwareSerial softser(ESP_RX, ESP_TX);
-Stream *esp = &softser; //Stream is the base class for character and binary based streams. It is not called directly, but invoked whenever you use a function that relies on it
-// * after the class name would be the c++ notation for a pointer
-
+Stream *esp = &softser; 
 // can be a SoftwareSerial stream, or Serial/Serial1/etc. for UART.
 
 Adafruit_ESP8266 wifi(&softser, &Serial, ESP_RST);
@@ -149,7 +147,7 @@ boolean ESP_GETpage(char const *host, uint16_t port) {//,char const *page
     }
   }
 
-  request += " /pushingbox?devid=vCB2DD101A50CEFD&status=Yay!It worked!&submit=Submit"; //This is where you have to use the device id given by PushingBox
+  request += " /pushingbox?devid=vCB2DD101A50CEFD"; //This is where you have to use the device id given by PushingBox
   request += " HTTP/1.1\r\nHost: ";
   request += host;
   request += "\r\n\r\n";
